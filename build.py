@@ -61,27 +61,24 @@ if __name__ == "__main__":
     system = platform_info.system()
 
     builder = ConanMultiPackager(
-        username=username, 
-        channel=channel, 
-        reference=reference, 
+        username=username,
+        channel=channel,
+        reference=reference,
         upload=upload,
         remotes=upload, #while redundant, this moves bincrafters remote to position 0
-        upload_only_when_stable=True, 
+        upload_only_when_stable=True,
         stable_branch_pattern="stable/*",
         platform_info=platform_info)
 
-    builder.add_common_builds()
+    builder.add_common_builds(pure_c=True)
     filtered_builds = []
     compilers = set()
     filtered_builds = []
 
     for settings, options, env_vars, build_requires in builder.builds:
         compiler = settings['compiler']
-        if compiler == 'gcc':
-            version = settings['compiler.version']
-            libstdcxx = 'libstdc++11' if version >= '5.1' else 'libstdc++'
-            settings['compiler.libcxx'] = libstdcxx
-        elif compiler == 'clang':
+        # libc++ is not used on linux by default
+        if compiler == 'clang':
             settings['compiler.libcxx'] = 'libc++'
         if force_linux:
             settings['os'] = 'Linux'
